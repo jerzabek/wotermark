@@ -28,8 +28,8 @@ export const WatermarkConfiguration = () => {
   }
 
   return (
-    <HStack gap="4" w="100%">
-      <Box flex="2">
+    <HStack gap="4" w="100%" flexDirection={{ base: 'column', md: 'row' }}>
+      <Box flex={{ base: '1', md: '2' }}>
         <Label className={css({ color: 'gray.700', _dark: { color: 'gray.300' } })}>Watermark Image</Label>
         {!watermarkPreview ? (
           <FileUpload
@@ -71,7 +71,7 @@ export const WatermarkConfiguration = () => {
           </Box>
         )}
       </Box>
-      <VStack flex="1">
+      <VStack flex="1" w="100%">
         <Box w="100%">
           <Label htmlFor="output-width" className={css({ color: 'gray.700', _dark: { color: 'gray.300' } })}>
             Output Image Size
