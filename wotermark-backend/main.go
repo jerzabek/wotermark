@@ -43,11 +43,13 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 
 func handleProcessImages(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		log.Printf("Method not allowed: %s", r.Method)
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	if err := r.ParseMultipartForm(32 << 20); err != nil { // 32MB max memory
+		log.Printf("Failed to parse multipart form: %v", err)
 		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return
 	}

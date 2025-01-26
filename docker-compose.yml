@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: ./wotermark-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080"
+    environment:
+      - PORT=8080
+    networks:
+      - wotermark-network
+
+  frontend:
+    build:
+      context: ./wotermark-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "1235:80"
+    depends_on:
+      - backend
+    networks:
+      - wotermark-network
+
+networks:
+  wotermark-network:
+    driver: bridge

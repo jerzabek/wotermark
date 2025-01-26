@@ -45,10 +45,6 @@ export const HomePage = () => {
 
       const response = await fetch('/api/process-images', {
         method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'multipart/form-data',
-        },
         body: formData,
       })
 
