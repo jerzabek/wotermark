@@ -1,5 +1,6 @@
 import { css } from '@shadow-panda/styled-system/css'
 import { VStack, Box, HStack } from '@shadow-panda/styled-system/jsx'
+import { useEffect, useState } from 'react'
 
 import { FileUpload } from '@/features/FileUpload'
 import { useWatermark } from '@/shared/context'
@@ -7,6 +8,16 @@ import { Input, Button, Label } from '@/shared/ui'
 
 export const WatermarkConfiguration = () => {
   const { config, setConfig, watermarkPreview, setWatermark } = useWatermark()
+
+  const [widthInput, setWidthInput] = useState(config.outputWidth.toString())
+  const [heightInput, setHeightInput] = useState(config.outputHeight.toString())
+  const [sizeInput, setSizeInput] = useState(config.watermarkSize.toString())
+
+  useEffect(() => {
+    setWidthInput(config.outputWidth.toString())
+    setHeightInput(config.outputHeight.toString())
+    setSizeInput(config.watermarkSize.toString())
+  }, [config])
 
   const handleWatermarkUpload = async (files: File[]) => {
     if (files.length > 0) {
@@ -18,7 +29,7 @@ export const WatermarkConfiguration = () => {
 
   return (
     <HStack gap="4" w="100%">
-      <Box w="100%">
+      <Box flex="2">
         <Label className={css({ color: 'gray.700', _dark: { color: 'gray.300' } })}>Watermark Image</Label>
         {!watermarkPreview ? (
           <FileUpload
@@ -60,7 +71,7 @@ export const WatermarkConfiguration = () => {
           </Box>
         )}
       </Box>
-      <VStack>
+      <VStack flex="1">
         <Box w="100%">
           <Label htmlFor="output-width" className={css({ color: 'gray.700', _dark: { color: 'gray.300' } })}>
             Output Image Size
@@ -77,8 +88,17 @@ export const WatermarkConfiguration = () => {
               <Input
                 id="output-width"
                 type="number"
-                value={config.outputWidth}
-                onChange={e => setConfig({ outputWidth: Number(e.target.value) })}
+                value={widthInput}
+                onChange={e => {
+                  setWidthInput(e.target.value)
+                  const value = Number(e.target.value)
+                  if (!isNaN(value)) {
+                    setConfig({ outputWidth: value })
+                  }
+                }}
+                max="8000"
+                step="1"
+                min="1"
               />
             </Box>
             <Box flex="1">
@@ -91,8 +111,17 @@ export const WatermarkConfiguration = () => {
               <Input
                 id="output-height"
                 type="number"
-                value={config.outputHeight}
-                onChange={e => setConfig({ outputHeight: Number(e.target.value) })}
+                value={heightInput}
+                onChange={e => {
+                  setHeightInput(e.target.value)
+                  const value = Number(e.target.value)
+                  if (!isNaN(value)) {
+                    setConfig({ outputHeight: value })
+                  }
+                }}
+                max="8000"
+                step="1"
+                min="1"
               />
             </Box>
           </HStack>
@@ -111,8 +140,15 @@ export const WatermarkConfiguration = () => {
             <Input
               id="watermark-size"
               type="number"
-              value={config.watermarkSize}
-              onChange={e => setConfig({ watermarkSize: Number(e.target.value) })}
+              value={sizeInput}
+              onChange={e => {
+                setSizeInput(e.target.value)
+                const value = Number(e.target.value)
+                if (!isNaN(value)) {
+                  setConfig({ watermarkSize: value })
+                }
+              }}
+              step="1"
               min="1"
               max="100"
             />
