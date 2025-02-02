@@ -1,50 +1,72 @@
-# React + TypeScript + Vite
+# Wotermark Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React-based web interface for the Wotermark application. Allows users to upload multiple images and apply customizable watermarks.
 
-Currently, two official plugins are available:
+## Technologies
+- React 18
+- TypeScript
+- Vite
+- Panda CSS
+- ESLint
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Local Development
 
-## Expanding the ESLint configuration
+### Prerequisites
+- Node.js 20+
+- Yarn
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Setup
+1. Install dependencies:
+```bash
+yarn
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+### Environment Variables
+Create a `.env` file in the root directory:
+```plaintext
+VITE_API_URL=http://localhost:8080
 ```
+
+### Running Locally
+```bash
+yarn dev
+```
+The application will be available at `http://localhost:5173`
+
+### Building for Production
+```bash
+yarn build
+```
+
+## Docker
+
+### Building the Image
+```bash
+docker build -t wotermark-frontend .
+```
+
+### Running with Docker
+```bash
+docker run -p 5173:80 wotermark-frontend
+```
+
+## Project Structure
+
+The project follows Feature-Sliced Design (FSD) methodology, organizing code into layers (shared, entities, features, widgets, pages) for better maintainability and scalability.
+
+```
+wotermark-frontend/
+├── src/
+│   ├── components/     # Reusable UI components
+│   ├── hooks/         # Custom React hooks
+│   ├── pages/         # Page components
+│   ├── types/         # TypeScript type definitions
+│   └── utils/         # Utility functions
+├── public/            # Static assets
+└── index.html         # Entry HTML file
+```
+
+## Available Scripts
+- `yarn dev`: Start development server
+- `yarn build`: Build for production
+- `yarn preview`: Preview production build locally
