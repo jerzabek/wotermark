@@ -1,4 +1,4 @@
-module github.com/ivanjerzabek/wotermark
+module wotermark-backend
 
 go 1.21
 

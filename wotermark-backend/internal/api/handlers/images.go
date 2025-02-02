@@ -1,121 +1,22 @@
-package main
+package handlers
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"image"
-	"image/color"
 	"image/jpeg"
 	"image/png"
 	"log"
-	"math"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/nfnt/resize"
+
+	"wotermark-backend/internal/image/models"
+	"wotermark-backend/internal/image/processor"
 )
 
-func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: .env file not found")
-	}
-
-	http.HandleFunc("/api/process-images", handleProcessImages)
-	http.HandleFunc("/health", handleHealth)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("Server starting on http://localhost:%s", port)
-	
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
-		log.Fatal("Server failed to start:", err)
-	}
-}
-
-func handleHealth(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
-}
-
-func scaleImage(img image.Image, targetWidth, targetHeight int) image.Image {
-	bounds := img.Bounds()
-	width := bounds.Dx()
-	height := bounds.Dy()
-
-	widthRatio := float64(targetWidth) / float64(width)
-	heightRatio := float64(targetHeight) / float64(height)
-
-	ratio := math.Min(widthRatio, heightRatio)
-
-	newWidth := uint(float64(width) * ratio)
-	newHeight := uint(float64(height) * ratio)
-
-	return resize.Resize(newWidth, newHeight, img, resize.Lanczos3)
-}
-
-func applyWatermark(img, watermark image.Image, watermarkOpacity float64) image.Image {
-	if watermarkOpacity == 0 {
-		watermarkOpacity = 0.5
-	}
-
-	bounds := img.Bounds()
-	result := image.NewRGBA(bounds)
-
-	// Copy the original image
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			result.Set(x, y, img.At(x, y))
-		}
-	}
-
-	// Calculate watermark position (center)
-	wBounds := watermark.Bounds()
-	wx := (bounds.Dx() - wBounds.Dx()) / 2
-	wy := (bounds.Dy() - wBounds.Dy()) / 2
-
-	// Apply watermark with alpha blending
-	for y := 0; y < wBounds.Dy(); y++ {
-		for x := 0; x < wBounds.Dx(); x++ {
-			if wx+x < bounds.Max.X && wy+y < bounds.Max.Y {
-				r1, g1, b1, a1 := watermark.At(x, y).RGBA()
-				r2, g2, b2, _ := result.At(wx+x, wy+y).RGBA()
-
-				// Convert from 0-65535 to 0-255 range
-				a1 = a1 >> 8
-
-				// Alpha blending with configurable opacity
-				alpha := (float64(a1) / 255.0) * watermarkOpacity
-				r := uint8((float64(r1>>8)*alpha + float64(r2>>8)*(1-alpha)))
-				g := uint8((float64(g1>>8)*alpha + float64(g2>>8)*(1-alpha)))
-				b := uint8((float64(b1>>8)*alpha + float64(b2>>8)*(1-alpha)))
-
-				result.Set(wx+x, wy+y, color.RGBA{r, g, b, 255})
-			}
-		}
-	}
-
-	return result
-}
-
-type WatermarkConfig struct {
-	OutputWidth    int     `json:"outputWidth"`
-	OutputHeight   int     `json:"outputHeight"`
-	WatermarkSize  float64 `json:"watermarkSize"`
-	WatermarkOpacity float64 `json:"watermarkOpacity"`
-}
-
-func handleProcessImages(w http.ResponseWriter, r *http.Request) {
+func HandleProcessImages(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		log.Printf("Method not allowed: %s", r.Method)
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -136,7 +37,7 @@ func handleProcessImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var config WatermarkConfig
+	var config models.WatermarkConfig
 	if err := json.Unmarshal([]byte(configStr), &config); err != nil {
 		log.Printf("Failed to parse watermark configuration: %v", err)
 		http.Error(w, "Invalid watermark configuration", http.StatusBadRequest)
@@ -180,14 +81,14 @@ func handleProcessImages(w http.ResponseWriter, r *http.Request) {
 			imageError = fmt.Sprintf("Failed to decode image: %v", err)
 		} else {
 			// Scale image to fit within target dimensions
-			scaledImg := scaleImage(img, config.OutputWidth, config.OutputHeight)
+			scaledImg := processor.ScaleImage(img, config.OutputWidth, config.OutputHeight)
 
 			// Scale watermark
 			watermarkHeight := int(float64(scaledImg.Bounds().Dy()) * config.WatermarkSize / 100)
 			scaledWatermark := resize.Resize(0, uint(watermarkHeight), watermarkImg, resize.Lanczos3)
 
 			// Apply watermark
-			finalImg := applyWatermark(scaledImg, scaledWatermark, config.WatermarkOpacity)
+			finalImg := processor.ApplyWatermark(scaledImg, scaledWatermark, config.WatermarkOpacity)
 
 			// Encode the result
 			buf := new(bytes.Buffer)
