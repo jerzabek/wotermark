@@ -22,5 +22,7 @@ services:
       - wotermark-network
 
 networks:
+  dokploy-network:
+    external: true
   wotermark-network:
     driver: bridge
