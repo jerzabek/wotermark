@@ -26,6 +26,27 @@ export const HomePage = () => {
     })
   }
 
+  const downloadBase64Image = (base64String: string, filename: string) => {
+    // Create a blob from the base64 string
+    const byteCharacters = atob(base64String)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: 'image/png' })
+
+    // Create download link
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   const handleProcessImages = async () => {
     if (!watermarkPreview) return
 
@@ -52,8 +73,22 @@ export const HomePage = () => {
         throw new Error('Failed to process images')
       }
 
-      const result = await response.json()
+      const result: { errors: Array<string | null>; images: Array<string | null> } = await response.json()
       console.log('Images processed:', result)
+
+      // Download successfully processed images
+      result.images.forEach((base64Image, index) => {
+        if (base64Image && !result.errors[index]) {
+          // Get original filename and add watermark suffix
+          const originalFile = uploadedImages[index]
+          const originalName = originalFile.name
+          const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'))
+          const ext = originalName.substring(originalName.lastIndexOf('.'))
+          const watermarkedName = `${nameWithoutExt}_watermarked${ext}`
+
+          downloadBase64Image(base64Image, watermarkedName)
+        }
+      })
     } catch (error) {
       console.error('Error processing images:', error)
       // Handle error here (e.g., show error message to user)
