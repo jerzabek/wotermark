@@ -3,23 +3,25 @@ services:
     build:
       context: ./wotermark-backend
       dockerfile: Dockerfile
-    ports:
+    expose:
       - "8080"
     environment:
       - PORT=8080
     networks:
       - wotermark-network
+      - dokploy-network
 
   frontend:
     build:
       context: ./wotermark-frontend
       dockerfile: Dockerfile
-    ports:
-      - "1235:80"
+    expose:
+      - "80"
     depends_on:
       - backend
     networks:
       - wotermark-network
+      - dokploy-network
 
 networks:
   dokploy-network:
