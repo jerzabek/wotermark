@@ -113,7 +113,7 @@ func HandleProcessImages(w http.ResponseWriter, r *http.Request) {
 		imageErrors = append(imageErrors, imageError)
 	}
 
-	log.Printf("[INFO] Successfully processed %d images with watermark.", len(processedImages))
+	log.Printf("[INFO] Successfully processed %d images with watermark", len(processedImages))
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
