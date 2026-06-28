@@ -1,4 +1,8 @@
 export { Button, type ButtonProps } from './Button'
 export { Input, type InputProps } from './Input'
+export { Textarea, type TextareaProps } from './Textarea'
 export { Label, type LabelProps } from './Label'
 export { Switch } from './Switch'
+export { Slider } from './Slider'
+export { Container } from './Container'
+export { Heading, Text } from './Typography'

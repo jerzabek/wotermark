@@ -1,6 +1,6 @@
 import { openDB } from 'idb'
 
-import { Watermark } from '../model'
+import type { Watermark } from '../model'
 
 const DB_NAME = 'wotermark'
 const STORE_NAME = 'watermark'

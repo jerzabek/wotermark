@@ -1,3 +1,5 @@
+'use client'
+
 import { css, cx } from '@shadow-panda/styled-system/css'
 import { Box, VStack } from '@shadow-panda/styled-system/jsx'
 import { p } from '@shadow-panda/styled-system/recipes'
@@ -10,9 +12,11 @@ type FileUploadProps = {
   onFilesSelected: (files: File[]) => void
   accept?: Record<string, string[]>
   maxFiles?: number
+  /** Accessible name for the underlying file input. */
+  ariaLabel?: string
 }
 
-export const FileUpload = ({ onFilesSelected, accept, maxFiles = 0 }: FileUploadProps) => {
+export const FileUpload = ({ onFilesSelected, accept, maxFiles = 0, ariaLabel }: FileUploadProps) => {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const newFiles = maxFiles ? acceptedFiles.slice(0, maxFiles) : acceptedFiles
@@ -51,7 +55,7 @@ export const FileUpload = ({ onFilesSelected, accept, maxFiles = 0 }: FileUpload
         }}
         transition="all 0.2s"
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} aria-label={ariaLabel} />
         <VStack gap="2">
           <p className={cx(p(), css({ color: 'gray.900', textAlign: 'center', _dark: { color: 'gray.100' } }))}>
             Drop your images here, or click to select files

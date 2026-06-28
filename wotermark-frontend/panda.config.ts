@@ -3,9 +3,28 @@ import { defineConfig } from '@pandacss/dev'
 export default defineConfig({
   presets: ['@shadow-panda/preset'],
   preflight: true,
-  include: ['./src/**/*.{ts,tsx,js,jsx}', './pages/**/*.{ts,tsx,js,jsx}'],
+  include: ['./src/**/*.{ts,tsx,js,jsx}', './app/**/*.{ts,tsx,js,jsx}'],
   jsxFramework: 'react',
   outdir: '@shadow-panda/styled-system',
+
+  globalCss: {
+    // Visible keyboard focus for every interactive element.
+    '*:focus-visible': {
+      outlineColor: 'wmAccent',
+      outlineWidth: '2px',
+      outlineStyle: 'solid',
+      outlineOffset: '2px',
+    },
+    // Respect users who prefer reduced motion.
+    '@media (prefers-reduced-motion: reduce)': {
+      '*, *::before, *::after': {
+        animationDuration: '0.01ms !important',
+        animationIterationCount: '1 !important',
+        transitionDuration: '0.01ms !important',
+        scrollBehavior: 'auto !important',
+      },
+    },
+  },
 
   theme: {
     extend: {

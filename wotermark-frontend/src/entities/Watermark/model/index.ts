@@ -4,5 +4,6 @@ export type Watermark = {
     outputWidth: number
     outputHeight: number
     watermarkSize: number
+    watermarkOpacity: number
   }
 }

@@ -25,7 +25,7 @@ func ScaleImage(img image.Image, targetWidth, targetHeight int) image.Image {
 }
 
 func ApplyWatermark(img, watermark image.Image, watermarkOpacity float64) image.Image {
-	if watermarkOpacity == 0 {
+	if watermarkOpacity <= 0 {
 		watermarkOpacity = 0.5
 	}
 

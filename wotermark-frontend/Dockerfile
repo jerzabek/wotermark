@@ -2,22 +2,24 @@ FROM node:24.10-alpine AS build
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
-
-COPY .yarnrc.yml ./
+COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/ ./.yarn/
 
 RUN yarn install
 
 COPY . .
 
-RUN yarn prepare
+# Generates the Panda styled-system, then produces the static export in ./out
 RUN yarn build
 
 FROM node:24.10-alpine AS runner
 
-COPY --from=build /app/dist /app/dist
+WORKDIR /app
+
+RUN npm install -g serve
+
+COPY --from=build /app/out ./out
 
 EXPOSE 80
 
-CMD ["npx", "serve", "-s", "/app/dist", "-l", "80"]
+CMD ["serve", "out", "-l", "80"]
