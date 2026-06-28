@@ -1,9 +1,11 @@
-import { useState, useEffect, ReactNode } from 'react'
+'use client'
+
+import { useState, useEffect, type ReactNode } from 'react'
 
 import { loadWatermark, saveWatermark } from '@/entities/Watermark'
 
 import { WatermarkContext } from '../hooks'
-import { WatermarkConfig } from '../model'
+import { DEFAULT_WATERMARK_CONFIG, type WatermarkConfig } from '../model'
 
 type WatermarkProviderProps = {
   children: ReactNode
@@ -11,11 +13,7 @@ type WatermarkProviderProps = {
 
 export const WatermarkProvider = ({ children }: WatermarkProviderProps) => {
   const [watermarkPreview, setWatermarkPreview] = useState<string | null>(null)
-  const [config, setConfigState] = useState<WatermarkConfig>({
-    outputWidth: 1920,
-    outputHeight: 1080,
-    watermarkSize: 20,
-  })
+  const [config, setConfigState] = useState<WatermarkConfig>(DEFAULT_WATERMARK_CONFIG)
 
   useEffect(() => {
     const initWatermark = async () => {

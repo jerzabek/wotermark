@@ -1,6 +1,8 @@
+'use client'
+
 import { createContext, useContext } from 'react'
 
-import { WatermarkContextType } from '../model'
+import type { WatermarkContextType } from '../model'
 
 export const WatermarkContext = createContext<WatermarkContextType | null>(null)
 
