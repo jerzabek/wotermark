@@ -8,6 +8,7 @@ main
 *.test
 
 *.out
+coverage.func.txt
 
 go.work
 

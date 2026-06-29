@@ -1,7 +1,7 @@
-import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { styled, type HTMLStyledProps } from '@shadow-panda/styled-system/jsx'
 import { button } from '@shadow-panda/styled-system/recipes'
+import * as React from 'react'
 
 const BaseButton = React.forwardRef<
   HTMLButtonElement,

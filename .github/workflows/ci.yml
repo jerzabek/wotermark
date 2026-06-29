@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, refactor]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same branch/PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Decide which app(s) changed so a frontend edit never runs backend jobs and
+  # vice versa. Anything under .github/** touches both (CI itself changed).
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/frontend.yml'
+              - '.github/workflows/backend.yml'
+              - '.github/actions/**'
+              - '.github/scripts/**'
+            frontend:
+              - *shared
+              - 'wotermark-frontend/**'
+            backend:
+              - *shared
+              - 'wotermark-backend/**'
+
+  # ---- Frontend: head (full) + base (coverage only, for the diff) ----
+  frontend:
+    name: Frontend
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    uses: ./.github/workflows/frontend.yml
+    with:
+      coverage-artifact: coverage-frontend-head
+      full: true
+
+  frontend-base:
+    name: Frontend (base)
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' && github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/frontend.yml
+    with:
+      ref: ${{ github.event.pull_request.base.sha }}
+      coverage-artifact: coverage-frontend-base
+      full: false
+
+  # ---- Backend: head (full) + base (coverage only, for the diff) ----
+  backend:
+    name: Backend
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    uses: ./.github/workflows/backend.yml
+    with:
+      coverage-artifact: coverage-backend-head
+      full: true
+
+  backend-base:
+    name: Backend (base)
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' && github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/backend.yml
+    with:
+      ref: ${{ github.event.pull_request.base.sha }}
+      coverage-artifact: coverage-backend-base
+      full: false
+
+  # ---- Coverage report: diff head vs base, comment on the PR (report only) ----
+  coverage:
+    name: Coverage report
+    needs: [changes, frontend, frontend-base, backend, backend-base]
+    if: ${{ always() && github.event_name == 'pull_request' && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage-artifacts
+        continue-on-error: true # some artifacts are absent when an app didn't change
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Build coverage comment
+        run: node .github/scripts/coverage-comment.mjs
+        env:
+          ARTIFACTS_DIR: coverage-artifacts
+          OUTPUT_FILE: coverage-comment.md
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+      - name: Post coverage comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const body = fs.readFileSync('coverage-comment.md', 'utf8')
+            const marker = '<!-- coverage-report -->'
+            const { owner, repo } = context.repo
+            const issue_number = context.issue.number
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number })
+            const existing = comments.find(c => c.body && c.body.includes(marker))
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body })
+            }
