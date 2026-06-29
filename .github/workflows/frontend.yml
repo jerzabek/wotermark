@@ -1,7 +1,8 @@
 name: Frontend
 
 # Reusable workflow: lint, test (with coverage), build and (optionally) e2e the
-# Next.js frontend. Called by ci.yml for both the PR head and the PR base.
+# Next.js frontend. Called by ci.yml for the PR head (full) and the PR base
+# (coverage only) — the base summary feeds the coverage diff comment.
 on:
   workflow_call:
     inputs:
@@ -12,7 +13,7 @@ on:
       coverage-artifact:
         description: Name to upload the coverage summary under.
         type: string
-        default: coverage-frontend-head
+        default: frontend-coverage-head
       full:
         description: >
           true  = lint + coverage + build + docker + e2e (the PR head).
@@ -52,9 +53,8 @@ jobs:
         run: yarn lint
 
       # On the base ref the project may predate the coverage tooling; never let
-      # that fail the run — a missing baseline just shows as "no baseline".
+      # that fail the run — a missing baseline just drops the diff trend.
       - name: Test with coverage
-        id: coverage
         continue-on-error: ${{ !inputs.full }}
         run: yarn test:coverage
 
@@ -69,8 +69,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.coverage-artifact }}
-          path: wotermark-frontend/coverage/coverage-summary.json
-          if-no-files-found: error
+          path: |
+            wotermark-frontend/coverage/coverage-summary.json
+            wotermark-frontend/coverage/coverage-final.json
+          if-no-files-found: warn # the base run may only have the summary
           retention-days: 7
 
       - name: Build (static export)
@@ -95,8 +97,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.ref }}
 
       - name: Setup
         uses: ./.github/actions/setup-frontend

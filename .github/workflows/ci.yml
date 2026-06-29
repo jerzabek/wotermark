@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, refactor]
+    branches: [main]
   workflow_dispatch:
 
 # Cancel superseded runs on the same branch/PR.
@@ -34,7 +34,6 @@ jobs:
               - '.github/workflows/frontend.yml'
               - '.github/workflows/backend.yml'
               - '.github/actions/**'
-              - '.github/scripts/**'
             frontend:
               - *shared
               - 'wotermark-frontend/**'
@@ -42,14 +41,14 @@ jobs:
               - *shared
               - 'wotermark-backend/**'
 
-  # ---- Frontend: head (full) + base (coverage only, for the diff) ----
+  # ---- Frontend: head (full) + base (coverage only, feeds the diff comment) ----
   frontend:
     name: Frontend
     needs: changes
     if: ${{ needs.changes.outputs.frontend == 'true' }}
     uses: ./.github/workflows/frontend.yml
     with:
-      coverage-artifact: coverage-frontend-head
+      coverage-artifact: frontend-coverage-head
       full: true
 
   frontend-base:
@@ -59,73 +58,64 @@ jobs:
     uses: ./.github/workflows/frontend.yml
     with:
       ref: ${{ github.event.pull_request.base.sha }}
-      coverage-artifact: coverage-frontend-base
+      coverage-artifact: frontend-coverage-base
       full: false
 
-  # ---- Backend: head (full) + base (coverage only, for the diff) ----
+  # ---- Backend: tests, build + its own coverage diff comment (gwatts) ----
   backend:
     name: Backend
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
     uses: ./.github/workflows/backend.yml
-    with:
-      coverage-artifact: coverage-backend-head
-      full: true
+    permissions:
+      contents: write # gwatts stores the coverage baseline in git notes
+      pull-requests: write
 
-  backend-base:
-    name: Backend (base)
-    needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' && github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/backend.yml
-    with:
-      ref: ${{ github.event.pull_request.base.sha }}
-      coverage-artifact: coverage-backend-base
-      full: false
-
-  # ---- Coverage report: diff head vs base, comment on the PR (report only) ----
+  # ---- Frontend coverage report: diff head vs base, comment on the PR ----
   coverage:
     name: Coverage report
-    needs: [changes, frontend, frontend-base, backend, backend-base]
-    if: ${{ always() && github.event_name == 'pull_request' && (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true') }}
+    needs: [changes, frontend, frontend-base]
+    if: ${{ always() && github.event_name == 'pull_request' && needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # so the action can resolve changed files
 
-      - name: Download coverage artifacts
+      - name: Download head coverage
         uses: actions/download-artifact@v8
         with:
-          path: coverage-artifacts
-        continue-on-error: true # some artifacts are absent when an app didn't change
+          name: frontend-coverage-head
+          path: coverage-head
+        continue-on-error: true
 
-      - uses: actions/setup-node@v6
+      - name: Download base coverage
+        uses: actions/download-artifact@v8
         with:
-          node-version-file: .nvmrc
+          name: frontend-coverage-base
+          path: coverage-base
+        continue-on-error: true
 
-      - name: Build coverage comment
-        run: node .github/scripts/coverage-comment.mjs
-        env:
-          ARTIFACTS_DIR: coverage-artifacts
-          OUTPUT_FILE: coverage-comment.md
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      # Only pass a compare path if the base summary is real (the first PR on a
+      # branch that predates the coverage tooling has none → no trend, no error).
+      - name: Resolve base summary
+        id: base
+        run: |
+          if [ -s coverage-base/coverage-summary.json ] && grep -q '"total"' coverage-base/coverage-summary.json; then
+            echo "compare=${{ github.workspace }}/coverage-base/coverage-summary.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "compare=" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Post coverage comment
-        uses: actions/github-script@v9
+      - name: Frontend coverage report
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
-          script: |
-            const fs = require('fs')
-            const body = fs.readFileSync('coverage-comment.md', 'utf8')
-            const marker = '<!-- coverage-report -->'
-            const { owner, repo } = context.repo
-            const issue_number = context.issue.number
-            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number })
-            const existing = comments.find(c => c.body && c.body.includes(marker))
-            if (existing) {
-              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body })
-            } else {
-              await github.rest.issues.createComment({ owner, repo, issue_number, body })
-            }
+          name: Frontend
+          working-directory: wotermark-frontend
+          json-summary-path: ${{ github.workspace }}/coverage-head/coverage-summary.json
+          json-final-path: ${{ github.workspace }}/coverage-head/coverage-final.json
+          json-summary-compare-path: ${{ steps.base.outputs.compare }}
+          file-coverage-mode: changes
