@@ -34,7 +34,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      # For the base run, swap in the base ref's app source while keeping this
+      # PR's .github/ — so the local composite action below still resolves
+      # (it doesn't exist on the base ref yet on the first PR).
+      - name: Use base app source
+        if: ${{ inputs.ref != '' }}
+        working-directory: ${{ github.workspace }}
+        run: git checkout ${{ inputs.ref }} -- wotermark-frontend wotermark-backend
 
       - name: Setup
         uses: ./.github/actions/setup-frontend
