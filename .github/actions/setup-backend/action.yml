@@ -9,5 +9,5 @@ runs:
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
-        go-version-file: wotermark-backend/go.mod
-        cache-dependency-path: wotermark-backend/go.sum
+        go-version-file: apps/backend/go.mod
+        cache-dependency-path: apps/backend/go.sum

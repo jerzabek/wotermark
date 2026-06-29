@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"wotermark-backend/internal/api/handlers"
+	"backend/internal/api/handlers"
 )
 
 func SetupRoutes() http.Handler {

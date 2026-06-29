@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: wotermark-backend
+        working-directory: apps/backend
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -34,7 +34,7 @@ jobs:
       - name: Test with coverage
         uses: gwatts/go-coverage-action@v2
         with:
-          working-directory: wotermark-backend
+          working-directory: apps/backend
           cover-mode: atomic
           add-comment: true
           fail-coverage: never
@@ -45,4 +45,4 @@ jobs:
       # Docker image is a smoke test only; failures are reported but don't block.
       - name: Build Docker image
         continue-on-error: true
-        run: docker build -t wotermark-backend:ci .
+        run: docker build -t backend:ci .

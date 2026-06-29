@@ -14,8 +14,8 @@ import (
 
 	"github.com/nfnt/resize"
 
-	"wotermark-backend/internal/image/models"
-	"wotermark-backend/internal/image/processor"
+	"backend/internal/image/models"
+	"backend/internal/image/processor"
 )
 
 const (
