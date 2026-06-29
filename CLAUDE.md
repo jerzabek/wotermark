@@ -14,6 +14,19 @@ URLs** — never hardcode the backend origin in frontend code. Routing of `/api`
 to the backend is an infrastructure concern (dev proxy / nginx / Cloudflare),
 not an app concern.
 
+## Development workflow
+
+**Whenever you start something new, create a git worktree for it** — don't work
+directly on `main`. Worktrees are crucial here: they let several features /
+fixes / experiments progress in parallel, each in its own checkout with its own
+branch, without stashing or clobbering each other.
+
+```bash
+git worktree add ../wotermark-<short-name> -b <branch-name>   # new branch in a new dir
+cd ../wotermark-<short-name>                                   # work, commit, open a PR
+git worktree remove ../wotermark-<short-name>                  # clean up after merge
+```
+
 ## Running locally
 
 Two terminals — backend first, then frontend:
