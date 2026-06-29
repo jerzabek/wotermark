@@ -24,25 +24,32 @@ export default function AboutPage() {
       </Heading>
 
       <Text className={body}>
-        {SITE_NAME} is a free tool for adding a watermark to many images at once. Upload a single
-        watermark, drop in a batch of photos, and download every one of them watermarked — no
-        accounts, no installs, no fuss.
+        {SITE_NAME} is a free tool for adding a watermark to many images at once. Upload a single watermark, drop in a
+        batch of photos, and download every one of them watermarked — no accounts, no installs, no fuss.
       </Text>
 
       <Heading as="h2" className={h2}>
         How it works
       </Heading>
-      <ol className={css({ pl: '6', listStyleType: 'decimal', color: 'gray.700', _dark: { color: 'gray.300' }, lineHeight: 'relaxed' })}>
+      <ol
+        className={css({
+          pl: '6',
+          listStyleType: 'decimal',
+          color: 'gray.700',
+          _dark: { color: 'gray.300' },
+          lineHeight: 'relaxed',
+        })}
+      >
         <li className={css({ mb: '2' })}>
-          <strong>Add your watermark.</strong> Upload a PNG (transparency recommended), then set the
-          output size, how large the watermark should be, and its opacity.
+          <strong>Add your watermark.</strong> Upload a PNG (transparency recommended), then set the output size, how
+          large the watermark should be, and its opacity.
         </li>
         <li className={css({ mb: '2' })}>
           <strong>Drop in your images.</strong> Add as many as you like — JPG, PNG or WebP.
         </li>
         <li className={css({ mb: '2' })}>
-          <strong>Process &amp; download.</strong> Each image is scaled and watermarked, then you can
-          download them individually or grab everything as a single ZIP.
+          <strong>Process &amp; download.</strong> Each image is scaled and watermarked, then you can download them
+          individually or grab everything as a single ZIP.
         </li>
       </ol>
 
@@ -50,10 +57,13 @@ export default function AboutPage() {
         Privacy by design
       </Heading>
       <Text className={body}>
-        Your images are processed on the fly and are never stored on the server. Your watermark and
-        settings are kept locally in your browser so they&rsquo;re ready next time — they never leave
-        your device except when you process a batch. There are no analytics, tracking cookies or ads.
-        Read the full <Link href="/privacy" className={link}>privacy policy</Link>.
+        Your images are processed on the fly and are never stored on the server. Your watermark and settings are kept
+        locally in your browser so they&rsquo;re ready next time — they never leave your device except when you process
+        a batch. There are no analytics, tracking cookies or ads. Read the full{' '}
+        <Link href="/privacy" className={link}>
+          privacy policy
+        </Link>
+        .
       </Text>
 
       <Heading as="h2" className={h2}>
@@ -61,7 +71,10 @@ export default function AboutPage() {
       </Heading>
       <Text className={body}>
         {SITE_NAME} is free. If you hit a snag or have an idea, please{' '}
-        <Link href="/contact" className={link}>get in touch</Link>.
+        <Link href="/contact" className={link}>
+          get in touch
+        </Link>
+        .
       </Text>
 
       <VStack alignItems="flex-start" mt="8">

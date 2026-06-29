@@ -15,7 +15,7 @@ const LIGHT = '#f7fee7'
 const DARK = '#1a2e05'
 
 // The W is a font-free polyline so rendering never depends on installed fonts.
-const wMark = (stroke) =>
+const wMark = stroke =>
   `<polyline points="24,30 38,72 50,48 62,72 76,30" fill="none" stroke="${stroke}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`
 
 const roundedIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">

@@ -19,8 +19,8 @@ export default function ContactPage() {
         Contact
       </Heading>
       <Text className={css({ mb: '8', lineHeight: 'relaxed' })}>
-        Have a question, found a bug, or have a feature idea? Send a message below and it&rsquo;ll
-        reach me directly. Your email is only used to reply.
+        Have a question, found a bug, or have a feature idea? Send a message below and it&rsquo;ll reach me directly.
+        Your email is only used to reply.
       </Text>
 
       <Box maxW="xl">

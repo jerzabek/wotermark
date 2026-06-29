@@ -1,12 +1,12 @@
 'use client'
 
 import { css } from '@shadow-panda/styled-system/css'
-import { VStack, Box, HStack } from '@shadow-panda/styled-system/jsx'
+import { Box, HStack, VStack } from '@shadow-panda/styled-system/jsx'
 import { type ChangeEvent, useEffect, useState } from 'react'
 
 import { FileUpload } from '@/features/FileUpload'
 import { useWatermark } from '@/shared/context'
-import { Input, Button, Label, Slider } from '@/shared/ui'
+import { Button, Input, Label, Slider } from '@/shared/ui'
 
 const fieldset = css({ border: 'none', p: '0', m: '0', w: '100%' })
 const legend = css({
@@ -49,7 +49,15 @@ export const WatermarkConfiguration = () => {
   return (
     <HStack gap="6" w="100%" flexDirection={{ base: 'column', md: 'row' }} alignItems="flex-start">
       <Box flex={{ base: '1', md: '2' }} w="100%">
-        <p className={css({ fontSize: 'sm', fontWeight: 'medium', color: 'gray.700', mb: '2', _dark: { color: 'gray.300' } })}>
+        <p
+          className={css({
+            fontSize: 'sm',
+            fontWeight: 'medium',
+            color: 'gray.700',
+            mb: '2',
+            _dark: { color: 'gray.300' },
+          })}
+        >
           Watermark image
         </p>
         {!watermarkPreview ? (

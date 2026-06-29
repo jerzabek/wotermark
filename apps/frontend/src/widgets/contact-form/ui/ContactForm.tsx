@@ -1,14 +1,21 @@
 'use client'
 
 import { css } from '@shadow-panda/styled-system/css'
-import { VStack, Box } from '@shadow-panda/styled-system/jsx'
-import { useState, type FormEvent } from 'react'
+import { Box, VStack } from '@shadow-panda/styled-system/jsx'
+import { type FormEvent, useState } from 'react'
 
 import { Button, Input, Label, Text, Textarea } from '@/shared/ui'
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error'
 
-const fieldLabel = css({ display: 'block', mb: '1', fontSize: 'sm', fontWeight: 'medium', color: 'gray.700', _dark: { color: 'gray.300' } })
+const fieldLabel = css({
+  display: 'block',
+  mb: '1',
+  fontSize: 'sm',
+  fontWeight: 'medium',
+  color: 'gray.700',
+  _dark: { color: 'gray.300' },
+})
 
 export const ContactForm = () => {
   const [state, setState] = useState<SubmitState>('idle')
@@ -44,9 +51,7 @@ export const ContactForm = () => {
     } catch (err) {
       setState('error')
       setStatusMessage(
-        err instanceof Error && err.message
-          ? err.message
-          : 'Something went wrong. Please try again later.',
+        err instanceof Error && err.message ? err.message : 'Something went wrong. Please try again later.',
       )
     }
   }

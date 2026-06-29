@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 // 1x1 transparent PNG returned by the mocked backend for each processed image.
-const TINY_PNG =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+const TINY_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
 
 test('uploading a watermark and images yields downloadable results', async ({ page }) => {
   await page.route('**/api/process-images', route =>
@@ -35,10 +34,9 @@ test('a mix of succeeded and failed images offers downloads only for the success
 
   await page.goto('/')
   await page.getByLabel('Upload a watermark image').setInputFiles('e2e/fixtures/watermark.png')
-  await page.getByLabel('Upload images to watermark').setInputFiles([
-    'e2e/fixtures/photo.png',
-    'e2e/fixtures/photo2.png',
-  ])
+  await page
+    .getByLabel('Upload images to watermark')
+    .setInputFiles(['e2e/fixtures/photo.png', 'e2e/fixtures/photo2.png'])
   await page.getByRole('button', { name: /process images/i }).click()
 
   // Success: per-image download + the batch download stays available.
@@ -60,10 +58,9 @@ test('when every image fails, no downloads are offered and each error is shown',
 
   await page.goto('/')
   await page.getByLabel('Upload a watermark image').setInputFiles('e2e/fixtures/watermark.png')
-  await page.getByLabel('Upload images to watermark').setInputFiles([
-    'e2e/fixtures/photo.png',
-    'e2e/fixtures/photo2.png',
-  ])
+  await page
+    .getByLabel('Upload images to watermark')
+    .setInputFiles(['e2e/fixtures/photo.png', 'e2e/fixtures/photo2.png'])
   await page.getByRole('button', { name: /process images/i }).click()
 
   await expect(page.getByText('First image failed')).toBeVisible()
