@@ -9,8 +9,8 @@ import { useWatermark } from '@/shared/context'
 import { Button, Heading, Text } from '@/shared/ui'
 import { WatermarkConfiguration } from '@/widgets/watermark-configuration'
 
-import { downloadAllAsZip, downloadImage } from '../lib/download'
 import { UploadedImageCard, type CardStatus } from './UploadedImageCard'
+import { downloadAllAsZip, downloadImage } from '../lib/download'
 
 type ProcessResult = { base64: string | null; error: string | null }
 

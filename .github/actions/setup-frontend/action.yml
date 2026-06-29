@@ -1,0 +1,38 @@
+name: Setup frontend
+description: >
+  Set up Node (from .nvmrc), enable Corepack/Yarn 4, restore the Yarn cache,
+  install dependencies immutably and generate the Panda styled-system.
+  Assumes the repo is already checked out.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    # Yarn 4 uses a global cache by default; key it on the lockfile so installs
+    # are fast and deterministic. A miss is harmless (a clean install runs).
+    - name: Restore Yarn cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.yarn/berry/cache
+        key: yarn-${{ runner.os }}-${{ hashFiles('wotermark-frontend/yarn.lock') }}
+        restore-keys: yarn-${{ runner.os }}-
+
+    - name: Install dependencies
+      shell: bash
+      working-directory: wotermark-frontend
+      run: yarn install --immutable
+
+    # styled-system is gitignored/generated; vitest, next build and the dev
+    # server all import from it, so it must exist before anything runs.
+    - name: Generate Panda styled-system
+      shell: bash
+      working-directory: wotermark-frontend
+      run: yarn panda codegen
