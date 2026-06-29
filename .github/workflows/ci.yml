@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs on the same branch/PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Decide which app(s) changed so a frontend edit never runs backend jobs and
+  # vice versa. Anything under .github/** touches both (CI itself changed).
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/frontend.yml'
+              - '.github/workflows/backend.yml'
+              - '.github/actions/**'
+            frontend:
+              - *shared
+              - 'wotermark-frontend/**'
+            backend:
+              - *shared
+              - 'wotermark-backend/**'
+
+  # ---- Frontend: head (full) + base (coverage only, feeds the diff comment) ----
+  frontend:
+    name: Frontend
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    uses: ./.github/workflows/frontend.yml
+    with:
+      coverage-artifact: frontend-coverage-head
+      full: true
+
+  frontend-base:
+    name: Frontend (base)
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' && github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/frontend.yml
+    with:
+      ref: ${{ github.event.pull_request.base.sha }}
+      coverage-artifact: frontend-coverage-base
+      full: false
+
+  # ---- Backend: tests, build + its own coverage diff comment (gwatts) ----
+  backend:
+    name: Backend
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    uses: ./.github/workflows/backend.yml
+    permissions:
+      contents: write # gwatts stores the coverage baseline in git notes
+      pull-requests: write
+
+  # ---- Frontend coverage report: diff head vs base, comment on the PR ----
+  coverage:
+    name: Coverage report
+    needs: [changes, frontend, frontend-base]
+    if: ${{ always() && github.event_name == 'pull_request' && needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # so the action can resolve changed files
+
+      - name: Download head coverage
+        uses: actions/download-artifact@v8
+        with:
+          name: frontend-coverage-head
+          path: coverage-head
+        continue-on-error: true
+
+      - name: Download base coverage
+        uses: actions/download-artifact@v8
+        with:
+          name: frontend-coverage-base
+          path: coverage-base
+        continue-on-error: true
+
+      # Only pass a compare path if the base summary is real (the first PR on a
+      # branch that predates the coverage tooling has none → no trend, no error).
+      - name: Resolve base summary
+        id: base
+        run: |
+          if [ -s coverage-base/coverage-summary.json ] && grep -q '"total"' coverage-base/coverage-summary.json; then
+            echo "compare=${{ github.workspace }}/coverage-base/coverage-summary.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "compare=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Frontend coverage report
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          name: Frontend
+          working-directory: wotermark-frontend
+          json-summary-path: ${{ github.workspace }}/coverage-head/coverage-summary.json
+          json-final-path: ${{ github.workspace }}/coverage-head/coverage-final.json
+          json-summary-compare-path: ${{ steps.base.outputs.compare }}
+          file-coverage-mode: changes

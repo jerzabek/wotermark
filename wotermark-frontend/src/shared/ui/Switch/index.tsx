@@ -1,10 +1,10 @@
 'use client'
 
-import * as React from 'react'
 import * as SwitchPrimitive from '@radix-ui/react-switch'
-import { styled } from '@shadow-panda/styled-system/jsx'
 import { cx } from '@shadow-panda/styled-system/css'
+import { styled } from '@shadow-panda/styled-system/jsx'
 import { switchRecipe } from '@shadow-panda/styled-system/recipes'
+import * as React from 'react'
 
 const BaseSwitch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitive.Root>,

@@ -1,0 +1,13 @@
+name: Setup backend
+description: >
+  Set up the Go toolchain from go.mod and enable module/build caching keyed on
+  go.sum. Assumes the repo is already checked out.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: wotermark-backend/go.mod
+        cache-dependency-path: wotermark-backend/go.sum

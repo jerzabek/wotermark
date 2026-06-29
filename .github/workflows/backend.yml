@@ -1,0 +1,48 @@
+name: Backend
+
+# Reusable workflow: vet, test (with coverage) and build the Go backend.
+# Coverage + the base-vs-PR diff comment are produced by gwatts/go-coverage-action,
+# which tracks the baseline in git notes (no separate base run needed).
+on:
+  workflow_call:
+
+permissions:
+  contents: write # gwatts/go-coverage-action stores the baseline in git notes
+  pull-requests: write # ...and comments the coverage diff on the PR
+
+jobs:
+  backend:
+    name: Vet, test & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wotermark-backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history so the action can diff against the base
+
+      - name: Setup
+        uses: ./.github/actions/setup-backend
+
+      - name: Vet
+        run: go vet ./...
+
+      # Runs `go test` with coverage, posts a PR comment with the % and the
+      # delta vs the base branch, and never fails the build (report-only).
+      - name: Test with coverage
+        uses: gwatts/go-coverage-action@v2
+        with:
+          working-directory: wotermark-backend
+          cover-mode: atomic
+          add-comment: true
+          fail-coverage: never
+
+      - name: Build
+        run: go build -o /tmp/wotermark-server ./cmd/server
+
+      # Docker image is a smoke test only; failures are reported but don't block.
+      - name: Build Docker image
+        continue-on-error: true
+        run: docker build -t wotermark-backend:ci .

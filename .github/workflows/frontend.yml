@@ -1,0 +1,116 @@
+name: Frontend
+
+# Reusable workflow: lint, test (with coverage), build and (optionally) e2e the
+# Next.js frontend. Called by ci.yml for the PR head (full) and the PR base
+# (coverage only) — the base summary feeds the coverage diff comment.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to check out. Empty = the ref that triggered the run.
+        type: string
+        default: ''
+      coverage-artifact:
+        description: Name to upload the coverage summary under.
+        type: string
+        default: frontend-coverage-head
+      full:
+        description: >
+          true  = lint + coverage + build + docker + e2e (the PR head).
+          false = coverage only, best-effort (the PR base, for the diff).
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Lint, test & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wotermark-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # For the base run, swap in the base ref's app source while keeping this
+      # PR's .github/ — so the local composite action below still resolves
+      # (it doesn't exist on the base ref yet on the first PR).
+      - name: Use base app source
+        if: ${{ inputs.ref != '' }}
+        working-directory: ${{ github.workspace }}
+        run: git checkout ${{ inputs.ref }} -- wotermark-frontend wotermark-backend
+
+      - name: Setup
+        uses: ./.github/actions/setup-frontend
+
+      - name: Lint
+        if: ${{ inputs.full }}
+        run: yarn lint
+
+      # On the base ref the project may predate the coverage tooling; never let
+      # that fail the run — a missing baseline just drops the diff trend.
+      - name: Test with coverage
+        continue-on-error: ${{ !inputs.full }}
+        run: yarn test:coverage
+
+      - name: Ensure coverage summary exists
+        if: always()
+        run: |
+          mkdir -p coverage
+          [ -f coverage/coverage-summary.json ] || echo '{}' > coverage/coverage-summary.json
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.coverage-artifact }}
+          path: |
+            wotermark-frontend/coverage/coverage-summary.json
+            wotermark-frontend/coverage/coverage-final.json
+          if-no-files-found: warn # the base run may only have the summary
+          retention-days: 7
+
+      - name: Build (static export)
+        if: ${{ inputs.full }}
+        run: yarn build
+
+      # Docker image is a smoke test only; failures are reported but don't block.
+      - name: Build Docker image
+        if: ${{ inputs.full }}
+        continue-on-error: true
+        run: docker build -t wotermark-frontend:ci .
+
+  e2e:
+    name: E2E (Playwright)
+    # Non-blocking: e2e flakiness must never block a PR.
+    if: ${{ inputs.full }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wotermark-frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup
+        uses: ./.github/actions/setup-frontend
+
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps chromium
+
+      - name: Run e2e
+        run: yarn e2e
+
+      - name: Upload Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: wotermark-frontend/playwright-report
+          retention-days: 7
