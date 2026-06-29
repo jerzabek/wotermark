@@ -8,7 +8,7 @@ runs:
   using: composite
   steps:
     - name: Set up Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version-file: .nvmrc
 
@@ -19,7 +19,7 @@ runs:
     # Yarn 4 uses a global cache by default; key it on the lockfile so installs
     # are fast and deterministic. A miss is harmless (a clean install runs).
     - name: Restore Yarn cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.yarn/berry/cache
         key: yarn-${{ runner.os }}-${{ hashFiles('wotermark-frontend/yarn.lock') }}

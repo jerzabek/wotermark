@@ -32,7 +32,7 @@ jobs:
         working-directory: wotermark-backend
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.coverage-artifact }}
           path: wotermark-backend/coverage.func.txt
