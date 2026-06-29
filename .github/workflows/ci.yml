@@ -36,10 +36,10 @@ jobs:
               - '.github/actions/**'
             frontend:
               - *shared
-              - 'wotermark-frontend/**'
+              - 'apps/wotermark-frontend/**'
             backend:
               - *shared
-              - 'wotermark-backend/**'
+              - 'apps/wotermark-backend/**'
 
   # ---- Frontend: head (full) + base (coverage only, feeds the diff comment) ----
   frontend:
@@ -114,7 +114,7 @@ jobs:
         uses: davelosert/vitest-coverage-report-action@v2
         with:
           name: Frontend
-          working-directory: wotermark-frontend
+          working-directory: apps/wotermark-frontend
           json-summary-path: ${{ github.workspace }}/coverage-head/coverage-summary.json
           json-final-path: ${{ github.workspace }}/coverage-head/coverage-final.json
           json-summary-compare-path: ${{ steps.base.outputs.compare }}

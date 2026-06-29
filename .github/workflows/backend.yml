@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: wotermark-backend
+        working-directory: apps/wotermark-backend
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -34,7 +34,7 @@ jobs:
       - name: Test with coverage
         uses: gwatts/go-coverage-action@v2
         with:
-          working-directory: wotermark-backend
+          working-directory: apps/wotermark-backend
           cover-mode: atomic
           add-comment: true
           fail-coverage: never

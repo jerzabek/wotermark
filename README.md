@@ -32,10 +32,10 @@ proxies `/api/*` to the backend, so no extra wiring is needed:
 
 ```bash
 # Terminal 1 — backend (http://localhost:8080)
-cd wotermark-backend && go run ./cmd/server
+cd apps/wotermark-backend && go run ./cmd/server
 
 # Terminal 2 — frontend (http://localhost:5173)
-cd wotermark-frontend && yarn && yarn dev
+cd apps/wotermark-frontend && yarn && yarn dev
 ```
 
 Then visit `http://localhost:5173`.
@@ -52,13 +52,13 @@ Both apps ship with automated tests:
 
 ```bash
 # Frontend — unit, component & accessibility (Vitest)
-cd wotermark-frontend && yarn test
+cd apps/wotermark-frontend && yarn test
 
 # Frontend — end-to-end (Playwright; first run only: npx playwright install chromium)
-cd wotermark-frontend && yarn e2e
+cd apps/wotermark-frontend && yarn e2e
 
 # Backend — unit & handler tests (Go)
-cd wotermark-backend && go test ./...
+cd apps/wotermark-backend && go test ./...
 ```
 
 - **Frontend** — [Vitest](https://vitest.dev) + React Testing Library + `vitest-axe`
@@ -81,11 +81,12 @@ for the full design.
 
 ```
 wotermark/
-├── wotermark-frontend/  # Next.js frontend (static export)
-└── wotermark-backend/   # Go backend service
+└── apps/
+    ├── wotermark-frontend/  # Next.js frontend (static export)
+    └── wotermark-backend/   # Go backend service
 ```
 
 For detailed documentation about each component, please refer to their respective README files:
 
-- [Frontend Documentation](./wotermark-frontend/README.md)
-- [Backend Documentation](./wotermark-backend/README.md)
+- [Frontend Documentation](./apps/wotermark-frontend/README.md)
+- [Backend Documentation](./apps/wotermark-backend/README.md)
