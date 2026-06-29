@@ -1,0 +1,77 @@
+name: Backend
+
+# Reusable workflow: vet, test (with coverage) and build the Go backend.
+# Called by ci.yml for both the PR head and the PR base.
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to check out. Empty = the ref that triggered the run.
+        type: string
+        default: ''
+      coverage-artifact:
+        description: Name to upload the coverage profile under.
+        type: string
+        default: coverage-backend-head
+      full:
+        description: >
+          true  = vet + coverage + build + docker (the PR head).
+          false = coverage only, best-effort (the PR base, for the diff).
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Vet, test & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wotermark-backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup
+        uses: ./.github/actions/setup-backend
+
+      - name: Vet
+        if: ${{ inputs.full }}
+        run: go vet ./...
+
+      # On the base ref the package layout may differ; never let that fail the
+      # run — a missing baseline just shows as "no baseline".
+      - name: Test with coverage
+        id: coverage
+        continue-on-error: ${{ !inputs.full }}
+        run: |
+          go test ./... -coverprofile=coverage.out -covermode=atomic
+          go tool cover -func=coverage.out | tee coverage.func.txt
+
+      - name: Ensure coverage summary exists
+        if: always()
+        # Empty file = "no baseline" to the report script (vs. a genuine 0%).
+        run: '[ -f coverage.func.txt ] || : > coverage.func.txt'
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.coverage-artifact }}
+          path: wotermark-backend/coverage.func.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build
+        if: ${{ inputs.full }}
+        run: go build -o /tmp/wotermark-server ./cmd/server
+
+      # Docker image is a smoke test only; failures are reported but don't block.
+      - name: Build Docker image
+        if: ${{ inputs.full }}
+        continue-on-error: true
+        run: docker build -t wotermark-backend:ci .

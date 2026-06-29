@@ -69,6 +69,14 @@ cd wotermark-backend && go test ./...
 
 See each component's README for the full breakdown of what's covered.
 
+## Continuous Integration
+
+Every pull request runs lint, tests, builds and a coverage report via GitHub
+Actions. Jobs are **path-filtered** (a frontend change doesn't trigger backend
+jobs, and vice versa) and a sticky PR comment reports total coverage per app
+plus the **diff against the base branch**. See [`.github/README.md`](./.github/README.md)
+for the full design.
+
 ## Project Structure
 
 ```
