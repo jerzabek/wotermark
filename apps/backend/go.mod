@@ -1,4 +1,4 @@
-module wotermark-backend
+module backend
 
 go 1.21
 

@@ -68,5 +68,5 @@ Env via `.env` (see `.env.example`):
 ```bash
 go run ./cmd/server      # or: go build -o wotermark ./cmd/server && ./wotermark
 go test ./...
-docker build -t wotermark-backend .
+docker build -t backend .
 ```

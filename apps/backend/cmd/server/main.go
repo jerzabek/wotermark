@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"wotermark-backend/internal/api"
+	"backend/internal/api"
 
 	"github.com/joho/godotenv"
 )

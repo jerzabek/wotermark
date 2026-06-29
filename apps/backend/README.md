@@ -75,12 +75,12 @@ What's covered:
 
 ### Building the Image
 ```bash
-docker build -t wotermark-backend .
+docker build -t backend .
 ```
 
 ### Running with Docker
 ```bash
-docker run -p 8080:8080 --env-file .env wotermark-backend
+docker run -p 8080:8080 --env-file .env backend
 ```
 
 ## API Documentation
@@ -192,7 +192,7 @@ When delivered, the backend POSTs the following JSON to `CONTACT_WEBHOOK_URL`
 
 ## Project Structure
 ```
-wotermark-backend/
+backend/
 ├── cmd/
 │   └── server/           # Application entrypoint (hardened http.Server, graceful shutdown)
 ├── internal/

@@ -67,8 +67,8 @@ This runs `panda codegen` then `next build`, producing a static export in
 ## Docker
 
 ```bash
-docker build -t wotermark-frontend .
-docker run -p 5173:80 wotermark-frontend
+docker build -t frontend .
+docker run -p 5173:80 frontend
 ```
 
 The image builds the static export and serves `./out` with `serve`.

@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/wotermark-frontend
+        working-directory: apps/frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -46,7 +46,7 @@ jobs:
         if: ${{ inputs.ref != '' }}
         working-directory: ${{ github.workspace }}
         run: |
-          git checkout ${{ inputs.ref }} -- apps/wotermark-frontend apps/wotermark-backend \
+          git checkout ${{ inputs.ref }} -- apps/frontend apps/backend \
             || echo "::warning::base ref lacks the apps/ layout; coverage baseline falls back to head"
 
       - name: Setup
@@ -74,8 +74,8 @@ jobs:
         with:
           name: ${{ inputs.coverage-artifact }}
           path: |
-            apps/wotermark-frontend/coverage/coverage-summary.json
-            apps/wotermark-frontend/coverage/coverage-final.json
+            apps/frontend/coverage/coverage-summary.json
+            apps/frontend/coverage/coverage-final.json
           if-no-files-found: warn # the base run may only have the summary
           retention-days: 7
 
@@ -87,7 +87,7 @@ jobs:
       - name: Build Docker image
         if: ${{ inputs.full }}
         continue-on-error: true
-        run: docker build -t wotermark-frontend:ci .
+        run: docker build -t frontend:ci .
 
   e2e:
     name: E2E (Playwright)
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/wotermark-frontend
+        working-directory: apps/frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -116,5 +116,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
-          path: apps/wotermark-frontend/playwright-report
+          path: apps/frontend/playwright-report
           retention-days: 7

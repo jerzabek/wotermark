@@ -22,17 +22,17 @@ runs:
       uses: actions/cache@v6
       with:
         path: ~/.yarn/berry/cache
-        key: yarn-${{ runner.os }}-${{ hashFiles('apps/wotermark-frontend/yarn.lock') }}
+        key: yarn-${{ runner.os }}-${{ hashFiles('apps/frontend/yarn.lock') }}
         restore-keys: yarn-${{ runner.os }}-
 
     - name: Install dependencies
       shell: bash
-      working-directory: apps/wotermark-frontend
+      working-directory: apps/frontend
       run: yarn install --immutable
 
     # styled-system is gitignored/generated; vitest, next build and the dev
     # server all import from it, so it must exist before anything runs.
     - name: Generate Panda styled-system
       shell: bash
-      working-directory: apps/wotermark-frontend
+      working-directory: apps/frontend
       run: yarn panda codegen
