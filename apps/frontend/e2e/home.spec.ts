@@ -4,9 +4,7 @@ import { expect, test } from '@playwright/test'
 test('home page has the right title and visible h1', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveTitle(/Wotermark/)
-  await expect(
-    page.getByRole('heading', { level: 1, name: /watermark your images in bulk/i }),
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: /watermark your images in bulk/i })).toBeVisible()
 })
 
 test('home page has no accessibility violations', async ({ page }) => {

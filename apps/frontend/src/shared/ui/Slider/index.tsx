@@ -24,7 +24,10 @@ export const Slider = ({ id, label, value, min, max, step = 1, formatValue, onCh
         <Label htmlFor={id} className={css({ fontSize: 'sm', color: 'gray.600', _dark: { color: 'gray.400' } })}>
           {label}
         </Label>
-        <span aria-hidden="true" className={css({ fontSize: 'sm', fontWeight: 'medium', color: 'gray.700', _dark: { color: 'gray.300' } })}>
+        <span
+          aria-hidden="true"
+          className={css({ fontSize: 'sm', fontWeight: 'medium', color: 'gray.700', _dark: { color: 'gray.300' } })}
+        >
           {display}
         </span>
       </div>

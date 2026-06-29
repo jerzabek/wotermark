@@ -36,11 +36,7 @@ export const UploadedImageCard = ({ file, preview, status, error, onRemove, onDo
     >
       <Box position="relative" width="100%" height="150px" bg="gray.100" _dark={{ bg: 'gray.900' }}>
         {preview && (
-          <img
-            src={preview}
-            alt={file.name}
-            className={css({ width: '100%', height: '100%', objectFit: 'cover' })}
-          />
+          <img src={preview} alt={file.name} className={css({ width: '100%', height: '100%', objectFit: 'cover' })} />
         )}
         {status === 'idle' && onRemove && (
           <Button

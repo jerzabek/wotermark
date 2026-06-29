@@ -28,10 +28,7 @@ const structuredData = {
 export default function HomePage() {
   return (
     <VStack gap="0" width="100%">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <Box textAlign="center" maxW="2xl" mx="auto" px="4" pt={{ base: '10', md: '16' }} pb="2">
         <h1
           className={css({
@@ -46,8 +43,8 @@ export default function HomePage() {
           Watermark your images in bulk
         </h1>
         <p className={css({ fontSize: { base: 'md', md: 'lg' }, color: 'gray.700', _dark: { color: 'gray.300' } })}>
-          Upload a watermark, drop in as many images as you like, and download them all watermarked at
-          once. Your images are processed on the fly and never stored.
+          Upload a watermark, drop in as many images as you like, and download them all watermarked at once. Your images
+          are processed on the fly and never stored.
         </p>
       </Box>
 

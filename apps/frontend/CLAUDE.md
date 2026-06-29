@@ -31,8 +31,9 @@ client-side.
   `@/entities/Watermark`) — **not** deep paths into a slice's internals.
 - **Import alias**: `@/*` → `src/*` (configured in `tsconfig.json` and mirrored
   in `vitest.config.ts`).
-- **Import order is lint-enforced** (`import/order`: builtin/external → internal
-  `@/**` → relative, alphabetized, newline between groups). Run `yarn lint`.
+- **Import order is enforced by Biome** (`organizeImports`): imports are grouped
+  (external → internal `@/**` → relative, separated by blank lines) and sorted
+  within each group. Run `yarn lint` (check) or `yarn lint:fix` (auto-fix).
 - **State**: the watermark + its config live in `WatermarkProvider` context;
   consume via `useWatermark()`. The current watermark is persisted to
   **IndexedDB** through `entities/Watermark` so it survives reloads.
@@ -44,8 +45,8 @@ client-side.
 
 - `@shadow-panda/styled-system/**` is **generated** by `panda codegen` (runs in
   `yarn prepare` and `yarn build`). **Never edit it by hand** and don't commit
-  fixes there — change `panda.config.ts` and regenerate. It's gitignored/ESLint-
-  ignored.
+  fixes there — change `panda.config.ts` and regenerate. It's gitignored and
+  excluded from Biome.
 - Use `css({...})` for one-offs, JSX primitives from
   `@shadow-panda/styled-system/jsx` (`Box`, `VStack`, `HStack`) for layout, and
   recipes from `.../recipes` (`button`, etc.) for variants.
@@ -62,7 +63,7 @@ client-side.
 yarn dev          # dev server on :5173, proxies /api/* to BACKEND_ORIGIN
 yarn build        # panda codegen + next build → static export in ./out
 yarn start        # serve the built ./out (run yarn build first)
-yarn lint         # ESLint
+yarn lint         # Biome: lint + format check (yarn lint:fix to auto-fix, yarn format to format)
 yarn test         # Vitest (jsdom): unit + component + vitest-axe a11y
 yarn e2e          # Playwright (first run: npx playwright install chromium)
 ```

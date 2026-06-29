@@ -141,7 +141,7 @@ at build time.
 - `yarn dev` — start the dev server (port 5173)
 - `yarn build` — Panda codegen + static export to `./out`
 - `yarn start` — serve the built `./out` locally (run `yarn build` first)
-- `yarn lint` — run ESLint
+- `yarn lint` — lint + format check with Biome (`yarn lint:fix` to auto-fix, `yarn format` to format)
 - `yarn test` — run the Vitest unit/component suite once
 - `yarn test:watch` — Vitest in watch mode
 - `yarn e2e` — run the Playwright end-to-end suite headless (needs `npx playwright install chromium` first)

@@ -1,16 +1,15 @@
 'use client'
 
 import { css } from '@shadow-panda/styled-system/css'
-import { VStack, Box, HStack } from '@shadow-panda/styled-system/jsx'
+import { Box, HStack, VStack } from '@shadow-panda/styled-system/jsx'
 import { useEffect, useState } from 'react'
 
 import { FileUpload } from '@/features/FileUpload'
 import { useWatermark } from '@/shared/context'
 import { Button, Heading, Text } from '@/shared/ui'
 import { WatermarkConfiguration } from '@/widgets/watermark-configuration'
-
-import { UploadedImageCard, type CardStatus } from './UploadedImageCard'
 import { downloadAllAsZip, downloadImage } from '../lib/download'
+import { type CardStatus, UploadedImageCard } from './UploadedImageCard'
 
 type ProcessResult = { base64: string | null; error: string | null }
 
@@ -89,9 +88,7 @@ export const WatermarkTool = () => {
     return r && r.base64 && !r.error ? 'done' : 'error'
   }
 
-  const successfulIndexes = results
-    ? results.map((r, i) => ({ r, i })).filter(({ r }) => r.base64 && !r.error)
-    : []
+  const successfulIndexes = results ? results.map((r, i) => ({ r, i })).filter(({ r }) => r.base64 && !r.error) : []
 
   const handleDownloadAll = async () => {
     await downloadAllAsZip(
@@ -138,7 +135,14 @@ export const WatermarkTool = () => {
               </HStack>
 
               {!watermarkPreview && (
-                <Text className={css({ fontSize: 'sm', color: 'gray.700', fontWeight: 'medium', _dark: { color: 'gray.300' } })}>
+                <Text
+                  className={css({
+                    fontSize: 'sm',
+                    color: 'gray.700',
+                    fontWeight: 'medium',
+                    _dark: { color: 'gray.300' },
+                  })}
+                >
                   Add a watermark image above to enable processing.
                 </Text>
               )}
