@@ -16,6 +16,7 @@ describe('formatFileSize', () => {
 
 describe('mimeFromName', () => {
   it('maps png', () => expect(mimeFromName('a.png')).toBe('image/png'))
+  it('maps gif', () => expect(mimeFromName('a.gif')).toBe('image/gif'))
   it('is case-insensitive', () => expect(mimeFromName('a.WEBP')).toBe('image/webp'))
   it('falls back to jpeg for unknown extensions', () => expect(mimeFromName('a.foo')).toBe('image/jpeg'))
   it('falls back to jpeg when there is no extension', () => expect(mimeFromName('a')).toBe('image/jpeg'))
